@@ -1,0 +1,1 @@
+{ "name": "com.gameframe.serviceprovider.Editor.Tests", "references": [ "com.gameframe.serviceprovider" ], "optionalUnityReferences": ["TestAssemblies"], "includePlatforms": [ "Editor" ], "excludePlatforms": [] }

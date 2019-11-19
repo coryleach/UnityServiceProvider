@@ -1,0 +1,14 @@
+{
+    "name": "com.gameframe.serviceprovider",
+    "displayName": "Gameframe.ServiceProvider",
+    "version": "1.0.0",
+    "description": "Service Provider",
+    "unity": "",
+    "unityRelease": "",
+    "keywords": [],
+    "author": {
+        "name": "Cory Leach",
+        "email": "cory.leach@gmail.com",
+        "url": "https://github.com/coryleach"
+    }
+}

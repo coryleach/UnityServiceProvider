@@ -1,0 +1,1 @@
+{ "name": "com.gameframe.serviceprovider.Editor", "references": [ "com.gameframe.serviceprovider" ], "optionalUnityReferences": [], "includePlatforms": [ "Editor" ], "excludePlatforms": [] }

@@ -1,0 +1,1 @@
+{ "name": "com.gameframe.serviceprovider.Tests", "references": [ "com.gameframe.serviceprovider" ], "optionalUnityReferences": ["TestAssemblies"], "includePlatforms": [], "excludePlatforms": [] }
