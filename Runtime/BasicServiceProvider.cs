@@ -6,7 +6,14 @@ namespace Gameframe.ServiceProvider
 {
     public class BasicServiceProvider : IServiceProvider, IServiceCollection
     {
-        private readonly Dictionary<Type, object> _serviceDictionary = new Dictionary<Type, object>();
+        private static BasicServiceProvider _sharedInstance = null;
+        public static BasicServiceProvider SharedInstance
+        {
+            get => _sharedInstance ?? (_sharedInstance = new BasicServiceProvider());
+            set => _sharedInstance = value;
+        }
+
+        private readonly Dictionary<Type, object> serviceDictionary = new Dictionary<Type, object>();
 
         public T Get<T>() where T : class
         {
@@ -15,7 +22,7 @@ namespace Gameframe.ServiceProvider
 
         public void GetAll<T>(IList<T> list) where T : class
         {
-            foreach (var pair in _serviceDictionary.Where(pair => pair.Value is T))
+            foreach (var pair in serviceDictionary.Where(pair => pair.Value is T))
             {
                 list.Add((T)pair.Value);
             }
@@ -23,14 +30,14 @@ namespace Gameframe.ServiceProvider
 
         public void AddSingleton<T>(T service) where T : class
         {
-            _serviceDictionary[ typeof(T) ] = service;
+            serviceDictionary[ typeof(T) ] = service;
         }
 
         #region IServiceProvider
         
         public object GetService(Type serviceType)
         {
-            return _serviceDictionary.TryGetValue(serviceType, out var value) ? value : null;
+            return serviceDictionary.TryGetValue(serviceType, out var value) ? value : null;
         }
         
         #endregion

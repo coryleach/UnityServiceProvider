@@ -5,7 +5,7 @@
         private static IServiceProvider _current;
         public static IServiceProvider Current
         {
-            get => _current ?? (_current = new BasicServiceProvider());
+            get => _current ?? (_current = BasicServiceProvider.SharedInstance);
             set => _current = value;
         }
     }

@@ -5,8 +5,18 @@ using UnityEngine;
 
 namespace Gameframe.ServiceProvider
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class UnityServiceProvider : IServiceProvider, IServiceCollection
     {
+        private static UnityServiceProvider _sharedInstance = null;
+        public static UnityServiceProvider SharedInstance
+        {
+            get => _sharedInstance ?? (_sharedInstance = new UnityServiceProvider());
+            set => _sharedInstance = value;
+        }
+        
         private readonly Dictionary<Type,Func<object>> _serviceDictionary = new Dictionary<Type, Func<object>>();
         
         public T Get<T>() where T : class
@@ -28,6 +38,10 @@ namespace Gameframe.ServiceProvider
             _serviceDictionary[typeof(T)] = () => service;
         }
 
+        /// <summary>
+        /// Add an automatically instantiated Singleton class
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public void AddSingleton<T>() where T : class
         {
             var serviceType = typeof(T);

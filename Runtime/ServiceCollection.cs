@@ -1,18 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class ServiceCollection : MonoBehaviour
+﻿namespace Gameframe.ServiceProvider
 {
-    // Start is called before the first frame update
-    void Start()
+    public static class ServiceCollection
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        private static IServiceCollection _current;
+        public static IServiceCollection Current
+        {
+            get => _current ?? (_current = BasicServiceProvider.SharedInstance);
+            set => _current = value;
+        }
     }
 }
