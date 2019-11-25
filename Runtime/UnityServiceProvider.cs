@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Gameframe.ServiceProvider
 {
+    
     /// <summary>
     /// 
     /// </summary>
@@ -17,63 +18,150 @@ namespace Gameframe.ServiceProvider
             set => _sharedInstance = value;
         }
         
-        private readonly Dictionary<Type,Func<object>> _serviceDictionary = new Dictionary<Type, Func<object>>();
+        private readonly Dictionary<Type,ServiceDescription> serviceDictionary = new Dictionary<Type, ServiceDescription>();
         
-        public T Get<T>() where T : class
+        /// <summary>
+        /// Get Service
+        /// </summary>
+        /// <typeparam name="TService">Type of service to get.</typeparam>
+        /// <returns>Service instance assuming one exists. May return null if service is not provided.</returns>
+        public TService Get<TService>() where TService : class
         {
-            return GetService(typeof(T)) as T;
-        }
-
-        public void GetAll<T>(IList<T> list) where T : class
-        {
-            list.Clear();
-            foreach (var pair in _serviceDictionary.Where(pair => pair.Key.IsSubclassOf(typeof(T)) || pair.Key == typeof(T)))
-            {
-                list.Add((T)pair.Value.Invoke());
-            }
-        }
-        
-        public void AddSingleton<T>(T service) where T : class
-        {
-            _serviceDictionary[typeof(T)] = () => service;
+            return GetService(typeof(TService)) as TService;
         }
 
         /// <summary>
+        /// Get all implementations that provide the requested service
+        /// </summary>
+        /// <param name="list">List to be filled with the service requested</param>
+        /// <typeparam name="TService">Type of the service to be requested</typeparam>
+        public void GetAll<TService>(IList<TService> list) where TService : class
+        {
+            list.Clear();
+            foreach (var pair in serviceDictionary.Where(pair => pair.Key.IsSubclassOf(typeof(TService)) || pair.Key == typeof(TService)))
+            {
+                list.Add((TService)pair.Value.GetService(this));
+            }
+        }
+        
+        /// <summary>
+        /// Add singleton service instance
+        /// </summary>
+        /// <param name="service">Service instance</param>
+        /// <typeparam name="TService">Service type</typeparam>
+        public void AddSingleton<TService>(TService service) where TService : class
+        {
+            var serviceDescription = new ServiceDescription
+            {
+                serviceType = ServiceType.Singleton,
+                factory = null,
+                service = service
+            };
+            serviceDictionary[ typeof(TService) ] = serviceDescription;
+        }
+
+        /// <summary>
+        /// Add a singleton factory that will create the requested service on demand
+        /// </summary>
+        /// <param name="factory">method that creates a service instance</param>
+        /// <typeparam name="TService">Type of the service</typeparam>
+        public void AddSingleton<TService>(Func<IServiceProvider, TService> factory) where TService : class
+        {
+            var serviceDescription = new ServiceDescription
+            {
+                serviceType = ServiceType.Singleton,
+                factory = factory,
+                service = null
+            };
+            serviceDictionary[ typeof(TService) ] = serviceDescription;
+        }
+
+        /// <summary>
+        /// Add an existing object as a service
+        /// </summary>
+        /// <param name="service">Service singleton instance</param>
+        /// <typeparam name="TService">Type of the service</typeparam>
+        /// <typeparam name="TImplementation">Type that implements the service</typeparam>
+        public void AddSingleton<TService, TImplementation>(TImplementation service) where TImplementation : TService
+        {
+            var serviceDescription = new ServiceDescription
+            {
+                serviceType = ServiceType.Singleton,
+                factory = null,
+                service = service
+            };
+            serviceDictionary[ typeof(TService) ] = serviceDescription;
+        }
+
+        /// <summary>
+        /// Add a singleton service.
+        /// Infers from type how to construct the singleton instance;
+        /// </summary>
+        /// <typeparam name="TService">Type of the service</typeparam>
+        public void AddSingleton<TService>()
+        {
+            var serviceType = typeof(TService);
+            AddSingleton(serviceType,serviceType);
+        }
+        
+        /// <summary>
         /// Add an automatically instantiated Singleton class
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void AddSingleton<T>() where T : class
+        /// <typeparam name="TService"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        public void AddSingleton<TService,TImplementation>() where TService : class where TImplementation : TService
         {
-            var serviceType = typeof(T);
+            var implementationType = typeof(TImplementation);
+            var serviceType = typeof(TService);
+            AddSingleton(serviceType,implementationType);
+        }
 
-            if (serviceType.IsSubclassOf(typeof(ScriptableObject)) )
+        /// <summary>
+        /// Add a service type
+        /// Infers from service parent classes how object is created
+        /// </summary>
+        /// <param name="serviceType">Type of the service</param>
+        /// <param name="implementationType">Type that implements the service</param>
+        private void AddSingleton(Type serviceType, Type implementationType)
+        {
+            var serviceDescription = new ServiceDescription
             {
-                var scriptableObject = ScriptableObject.CreateInstance(serviceType);
-                _serviceDictionary[serviceType] = () => scriptableObject;
+                serviceType = ServiceType.Singleton,
+                factory = null,
+                service = null
+            };
+
+            if (implementationType.IsSubclassOf(typeof(ScriptableObject)) )
+            {
+                serviceDescription.factory = provider => ScriptableObject.CreateInstance(implementationType);
             }
-            else if ( serviceType.IsSubclassOf(typeof(MonoBehaviour) ) )
+            else if ( implementationType.IsSubclassOf(typeof(MonoBehaviour) ) )
             {
-                var obj = new GameObject(serviceType.ToString());
-                UnityEngine.Object.DontDestroyOnLoad(obj);
-                var service = obj.AddComponent(serviceType);
-                _serviceDictionary[serviceType] = () => service;
+                serviceDescription.factory = provider =>
+                {
+                    var obj = new GameObject(implementationType.ToString());
+                    UnityEngine.Object.DontDestroyOnLoad(obj);
+                    return obj.AddComponent(implementationType);
+                };
             }
             else
             {
-                var service = Activator.CreateInstance(serviceType);
-                _serviceDictionary[serviceType] = () => service;
+                serviceDescription.factory = provider => Activator.CreateInstance(implementationType);
             }
+            
+            serviceDictionary[serviceType] = serviceDescription;
         }
         
         #region System.IServiceProvider
         
+        /// <summary>
+        /// Get Service
+        /// </summary>
+        /// <param name="serviceType">Type of service to get.</param>
+        /// <returns>Service instance.</returns>
         public object GetService(Type serviceType)
         {
-            if (_serviceDictionary.TryGetValue(serviceType, out var value))
-            {
-                return value.Invoke();
-            }
-            return null;
+            return serviceDictionary.TryGetValue(serviceType, out var value) ? value.GetService(this) : null;
         }
         
         #endregion

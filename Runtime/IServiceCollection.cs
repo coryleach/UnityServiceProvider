@@ -1,4 +1,6 @@
-﻿namespace Gameframe.ServiceProvider
+﻿using System;
+
+namespace Gameframe.ServiceProvider
 {
     /// <summary>
     /// TODO: Implement AddTransient
@@ -6,6 +8,8 @@
     /// </summary>
     public interface IServiceCollection
     {
-        void AddSingleton<T>(T service) where T : class;
+        void AddSingleton<TService>(TService service) where TService : class;
+        void AddSingleton<TService>(Func<IServiceProvider,TService> factory) where TService : class;
+        void AddSingleton<TService, TImplementation>(TImplementation service) where TImplementation : TService;
     }
 }
