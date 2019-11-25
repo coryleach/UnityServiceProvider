@@ -7,7 +7,9 @@ namespace Gameframe.ServiceProvider
 {
     
     /// <summary>
-    /// 
+    /// UnityServiceProvider provides all the functionality of the basic service provider
+    /// but also provides parameterless methods to add services that inherit unity object types
+    /// and will automatically create factory methods that instantiate those types for you.
     /// </summary>
     public class UnityServiceProvider : IServiceProvider, IServiceCollection
     {
@@ -82,7 +84,7 @@ namespace Gameframe.ServiceProvider
         /// <param name="service">Service singleton instance</param>
         /// <typeparam name="TService">Type of the service</typeparam>
         /// <typeparam name="TImplementation">Type that implements the service</typeparam>
-        public void AddSingleton<TService, TImplementation>(TImplementation service) where TImplementation : TService
+        public void AddSingleton<TService, TImplementation>(TImplementation service) where TImplementation : TService where TService : class
         {
             var serviceDescription = new ServiceDescription
             {
@@ -151,6 +153,31 @@ namespace Gameframe.ServiceProvider
             
             serviceDictionary[serviceType] = serviceDescription;
         }
+        
+        #region Add Transient
+        
+        public void AddTransient<TService, TImplementation>(Func<IServiceProvider, TImplementation> factory) where TService : class where TImplementation : TService
+        {
+            AddTransient(typeof(TService),(provider => factory.Invoke(this)));
+        }
+
+        public void AddTransient<TService>(Func<IServiceProvider, TService> factory)
+        {
+            AddTransient(typeof(TService),(provider => factory.Invoke(this)));
+        }
+        
+        private void AddTransient(Type serviceType, Func<IServiceProvider, object> factory)
+        {
+            var serviceDescription = new ServiceDescription
+            {
+                serviceType = ServiceType.Transient,
+                factory = factory,
+                service = null
+            };
+            serviceDictionary[ serviceType ] = serviceDescription;
+        }
+        
+        #endregion
         
         #region System.IServiceProvider
         

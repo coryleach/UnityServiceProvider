@@ -39,7 +39,7 @@ namespace Gameframe.ServiceProvider
         }
 
         private readonly Dictionary<Type, ServiceDescription> serviceDictionary = new Dictionary<Type, ServiceDescription>();
-
+        
         public T Get<T>() where T : class
         {
             return GetService(typeof(T)) as T;
@@ -53,6 +53,8 @@ namespace Gameframe.ServiceProvider
             }
         }
 
+        #region Add Singleton
+        
         public void AddSingleton<T>(T service) where T : class
         {
             var serviceDescription = new ServiceDescription
@@ -75,7 +77,7 @@ namespace Gameframe.ServiceProvider
             serviceDictionary[ typeof(T) ] = serviceDescription;
         }
 
-        public void AddSingleton<TService, TImplementation>(TImplementation service) where TImplementation : TService
+        public void AddSingleton<TService, TImplementation>(TImplementation service) where TImplementation : TService where TService : class
         {
             var serviceDescription = new ServiceDescription
             {
@@ -85,6 +87,33 @@ namespace Gameframe.ServiceProvider
             };
             serviceDictionary[ typeof(TService) ] = serviceDescription;
         }
+        
+        #endregion
+
+        #region Add Transient
+        
+        public void AddTransient<TService, TImplementation>(Func<IServiceProvider, TImplementation> factory) where TService : class where TImplementation : TService
+        {
+            AddTransient(typeof(TService),(provider => factory.Invoke(this)));
+        }
+
+        public void AddTransient<TService>(Func<IServiceProvider, TService> factory)
+        {
+            AddTransient(typeof(TService),(provider => factory.Invoke(this)));
+        }
+        
+        private void AddTransient(Type serviceType, Func<IServiceProvider, Object> factory)
+        {
+            var serviceDescription = new ServiceDescription
+            {
+                serviceType = ServiceType.Transient,
+                factory = factory,
+                service = null
+            };
+            serviceDictionary[ serviceType ] = serviceDescription;
+        }
+        
+        #endregion
 
         #region IServiceProvider
         
