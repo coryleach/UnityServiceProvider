@@ -161,7 +161,7 @@ namespace Gameframe.ServiceProvider
             AddTransient(typeof(TService),(provider => factory.Invoke(this)));
         }
 
-        public void AddTransient<TService>(Func<IServiceProvider, TService> factory)
+        public void AddTransient<TService>(Func<IServiceProvider, TService> factory) where TService : class
         {
             AddTransient(typeof(TService),(provider => factory.Invoke(this)));
         }
@@ -175,6 +175,37 @@ namespace Gameframe.ServiceProvider
                 service = null
             };
             serviceDictionary[ serviceType ] = serviceDescription;
+        }
+        
+        public void AddTransient<TService, TImplementation>() where TService : class where TImplementation : TService
+        {
+            AddTransient(typeof(TService),typeof(TImplementation));
+        }
+
+        public void AddTransient<TService>() where TService : class
+        {
+            AddTransient(typeof(TService),typeof(TService));
+        }
+        
+        private void AddTransient(Type serviceType, Type implementationType)
+        {
+            if (implementationType.IsSubclassOf(typeof(ScriptableObject)) )
+            {
+                AddTransient(serviceType, (serviceProvider) => ScriptableObject.CreateInstance(implementationType));
+            }
+            else if ( implementationType.IsSubclassOf(typeof(MonoBehaviour) ) )
+            {
+                AddTransient(serviceType, (serviceProvider) =>
+                {
+                    var obj = new GameObject(implementationType.ToString());
+                    UnityEngine.Object.DontDestroyOnLoad(obj);
+                    return obj.AddComponent(implementationType);
+                });
+            }
+            else
+            {
+                AddTransient(serviceType, provider => Activator.CreateInstance(implementationType));
+            }
         }
         
         #endregion

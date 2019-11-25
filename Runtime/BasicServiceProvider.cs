@@ -97,7 +97,7 @@ namespace Gameframe.ServiceProvider
             AddTransient(typeof(TService),(provider => factory.Invoke(this)));
         }
 
-        public void AddTransient<TService>(Func<IServiceProvider, TService> factory)
+        public void AddTransient<TService>(Func<IServiceProvider, TService> factory) where TService : class
         {
             AddTransient(typeof(TService),(provider => factory.Invoke(this)));
         }
