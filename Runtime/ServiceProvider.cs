@@ -1,4 +1,6 @@
-﻿namespace Gameframe.ServiceProvider
+﻿using UnityEngine;
+
+namespace Gameframe.ServiceProvider
 {
     public static class ServiceProvider
     {

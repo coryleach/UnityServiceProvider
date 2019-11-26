@@ -1,34 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
+using UnityEngine;
+using Object = System.Object;
 
 namespace Gameframe.ServiceProvider
 {
-    internal enum ServiceType
-    {
-        Singleton,
-        Transient,
-    }
-    
-    internal class ServiceDescription
-    {
-        public ServiceType serviceType = ServiceType.Singleton;
-        public Func<IServiceProvider, object> factory = null;
-        public object service = null;
-
-        public object GetService(IServiceProvider serviceProvider)
-        {
-            switch (serviceType)
-            {
-                case ServiceType.Singleton:
-                    return service ?? (service = factory.Invoke(serviceProvider));
-                default:
-                    return factory.Invoke(serviceProvider);
-            }
-        }
-    }
-    
     public class BasicServiceProvider : IServiceProvider, IServiceCollection
     {
         private static BasicServiceProvider _sharedInstance = null;
@@ -37,8 +14,10 @@ namespace Gameframe.ServiceProvider
             get => _sharedInstance ?? (_sharedInstance = new BasicServiceProvider());
             set => _sharedInstance = value;
         }
-
+        
         private readonly Dictionary<Type, ServiceDescription> serviceDictionary = new Dictionary<Type, ServiceDescription>();
+
+        public int Count => serviceDictionary.Count;
         
         public T Get<T>() where T : class
         {
@@ -47,7 +26,7 @@ namespace Gameframe.ServiceProvider
 
         public void GetAll<T>(IList<T> list) where T : class
         {
-            foreach (var pair in serviceDictionary.Where(pair => pair.Value is T))
+            foreach (var pair in serviceDictionary.Where(pair => typeof(T).IsAssignableFrom(pair.Key)) )
             {
                 list.Add((T)pair.Value.GetService(this));
             }
@@ -63,7 +42,7 @@ namespace Gameframe.ServiceProvider
                 factory = null,
                 service = service
             };
-            serviceDictionary[ typeof(T) ] = serviceDescription;
+            serviceDictionary.Add( typeof(T), serviceDescription);
         }
         
         public void AddSingleton<T>(Func<IServiceProvider,T> factory) where T : class
@@ -74,7 +53,7 @@ namespace Gameframe.ServiceProvider
                 factory = factory,
                 service = null
             };
-            serviceDictionary[ typeof(T) ] = serviceDescription;
+            serviceDictionary.Add( typeof(T), serviceDescription);
         }
 
         public void AddSingleton<TService, TImplementation>(TImplementation service) where TImplementation : TService where TService : class
@@ -85,7 +64,7 @@ namespace Gameframe.ServiceProvider
                 factory = null,
                 service = service
             };
-            serviceDictionary[ typeof(TService) ] = serviceDescription;
+            serviceDictionary.Add( typeof(TService), serviceDescription);
         }
         
         #endregion
