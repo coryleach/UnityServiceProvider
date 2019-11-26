@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
+using System.Runtime.Remoting;
 using UnityEngine;
 
 namespace Gameframe.ServiceProvider.Tests.Editor
@@ -8,7 +9,12 @@ namespace Gameframe.ServiceProvider.Tests.Editor
     {
         private class FakeServiceA : IFakeService
         {
-            
+            public static int instanceCount = 0;
+
+            public FakeServiceA()
+            {
+                instanceCount++;
+            }
         }
         
         private class FakeServiceB : IFakeService
@@ -77,6 +83,42 @@ namespace Gameframe.ServiceProvider.Tests.Editor
             ServiceProvider.Current.GetAll(list);
             
             Assert.True(list.Count == 2,$"IFakeService count = {list.Count} but we expected 2");
+        }
+
+        [Test]
+        public void CanAddSingletonServiceWithFactory()
+        {
+            FakeServiceA.instanceCount = 0;
+            ServiceCollection.Current.AddSingleton((serviceProvider) => new FakeServiceA());
+            
+            //Service should not be instantiated yet
+            Assert.True(FakeServiceA.instanceCount == 0);
+
+            var service = ServiceProvider.Current.Get<FakeServiceA>();
+            Assert.NotNull(service);
+            
+            //Should have instantiated when it was asked for
+            Assert.True(FakeServiceA.instanceCount == 1);
+
+            var serviceAgain = ServiceProvider.Current.Get<FakeServiceA>();
+            
+            //Assert the second time we get the service it's the same singleton instance and the count hasn't gone up
+            Assert.True(service==serviceAgain);
+            Assert.True(FakeServiceA.instanceCount == 1);
+        }
+
+        [Test]
+        public void CanAddAndGetTransientService()
+        {
+            FakeServiceA.instanceCount = 0;
+            ServiceCollection.Current.AddTransient((serviceProvider) => new FakeServiceA());
+            Assert.True(FakeServiceA.instanceCount == 0);
+
+            var service1 = ServiceProvider.Current.Get<FakeServiceA>();
+            Assert.True(FakeServiceA.instanceCount == 1);
+            var service2 = ServiceProvider.Current.Get<FakeServiceA>();
+            Assert.True(FakeServiceA.instanceCount == 2);
+            Assert.False(service1 == service2);
         }
         
     }
