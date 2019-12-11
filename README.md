@@ -6,7 +6,10 @@
   </a>
 </p>
 
-> Basic ServiceProvider implementation.
+> A simplified ServiceProvider implementation for use in Unity3D.</br>
+> Provides singleton and transient services.</br>
+> Does not do dependency graphs, property or constructor injection.</br>
+> Kind of just a glorified singleton manager.</br>
 
 ## Install 
 
