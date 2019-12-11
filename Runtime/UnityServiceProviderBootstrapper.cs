@@ -24,10 +24,9 @@ namespace Gameframe.ServiceProvider
         protected virtual void Awake()
         {
             //Setup service provider with our unity service provider instance
-            var unityServiceProvider = new UnityServiceProvider();
-            ServiceProvider.Current = unityServiceProvider;
-            ServiceCollection.Current = unityServiceProvider;
-            ConfigureServices(unityServiceProvider);
+            ServiceProvider.Current = UnityServiceProvider.SharedInstance;
+            ServiceCollection.Current = UnityServiceProvider.SharedInstance;
+            ConfigureServices(UnityServiceProvider.SharedInstance);
         }
 
         /// <summary>
