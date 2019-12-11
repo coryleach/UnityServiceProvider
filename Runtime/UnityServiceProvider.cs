@@ -40,7 +40,7 @@ namespace Gameframe.ServiceProvider
         public void GetAll<TService>(IList<TService> list) where TService : class
         {
             list.Clear();
-            foreach (var pair in serviceDictionary.Where(pair => pair.Key.IsSubclassOf(typeof(TService)) || pair.Key == typeof(TService)))
+            foreach (var pair in serviceDictionary.Where(pair => typeof(TService).IsAssignableFrom(pair.Key)) )
             {
                 list.Add((TService)pair.Value.GetService(this));
             }
@@ -230,7 +230,20 @@ namespace Gameframe.ServiceProvider
         /// <returns>Service instance.</returns>
         public object GetService(Type serviceType)
         {
-            return serviceDictionary.TryGetValue(serviceType, out var value) ? value.GetService(this) : null;
+            var serviceDescription = serviceDictionary.TryGetValue(serviceType, out var value) ? value : null;
+
+            if (serviceDescription == null)
+            {
+                return null;
+            }
+
+            switch (serviceDescription.serviceType)
+            {
+                case ServiceType.Singleton:
+                    return serviceDescription.service ?? (serviceDescription.service = serviceDescription.factory.Invoke(this));
+                default:
+                    return serviceDescription.factory.Invoke(this);
+            }
         }
         
         #endregion
