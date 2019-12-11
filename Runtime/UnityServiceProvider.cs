@@ -45,6 +45,17 @@ namespace Gameframe.ServiceProvider
                 list.Add((TService)pair.Value.GetService(this));
             }
         }
+
+        public void AddSingleton(Type serviceType, object service)
+        {
+            var serviceDescription = new ServiceDescription
+            {
+                serviceType = ServiceType.Singleton,
+                factory = null,
+                service = service
+            };
+            serviceDictionary[ serviceType ] = serviceDescription;
+        }
         
         /// <summary>
         /// Add singleton service instance
