@@ -31,12 +31,12 @@ Find the manifest.json file in the Packages folder of your project and edit it t
 ```c#
 //In your game bootstrapper script
 var myService = new MyService(); //MyService implements custom interface IMyService
-ServiceCollection.Current.AddService(myService);
+ServiceCollection.Current.AddSingleton(myService);
 
 ...
 
 //In some other script someplace
-var myService = ServiceProvider.Current.GetService<IMyService>();
+var myService = ServiceProvider.Current.Get<IMyService>();
 myService.DoStuff();
 ```
 
