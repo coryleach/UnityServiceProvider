@@ -10,7 +10,6 @@
 A simple service provider implementation for use in Unity3D.  
 Provides singleton and transient services.   
 </p>  
-
 <p>  
 Because the focus was on creating a simplified service provider this package does not do dependency graphs, property or constructor injection.  
 It is probably most easily used as a glorified singleton manager.  
@@ -21,7 +20,7 @@ It is probably most easily used as a glorified singleton manager.
 #### Using UnityPackageManager (for Unity 2019.3 or later)
 Open the package manager window (menu: Window > Package Manager)<br/>
 Select "Add package from git URL...", fill in the pop-up with the following link:<br/>
-https://github.com/coryleach/RepositoryName.git#1.0.0<br/>
+https://github.com/coryleach/UnityServiceProvider.git#1.0.0<br/>
 
 #### Using UnityPackageManager (for Unity 2019.1 or later)
 
@@ -29,7 +28,7 @@ Find the manifest.json file in the Packages folder of your project and edit it t
 ```js
 {
   "dependencies": {
-    "com.gameframe.serviceprovider": "https://github.com/coryleach/RepositoryName.git#1.0.0",
+    "com.gameframe.serviceprovider": "https://github.com/coryleach/UnityServiceProvider.git#1.0.0",
     ...
   },
 }

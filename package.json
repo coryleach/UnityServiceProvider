@@ -2,11 +2,14 @@
   "name": "com.gameframe.serviceprovider",
   "displayName": "Gameframe.ServiceProvider",
   "version": "1.0.0",
-  "description": "<p>\nA simple service provider implementation for use in Unity3D.\nProvides singleton and transient services. \n</p>\n\n<p>\nBecause the focus was on creating a simplified service provider this package does not do dependency graphs, property or constructor injection.\nIt is probably most easily used as a glorified singleton manager.\n</p>",
+  "description": "<p>\nA simple service provider implementation for use in Unity3D.\nProvides singleton and transient services. \n</p>\n<p>\nBecause the focus was on creating a simplified service provider this package does not do dependency graphs, property or constructor injection.\nIt is probably most easily used as a glorified singleton manager.\n</p>",
   "keywords": [],
   "author": {
     "name": "Cory Leach",
     "email": "cory.leach@gmail.com",
-    "url": "https://github.com/coryleach"
-  }
+    "url": "https://github.com/coryleach",
+    "github": "coryleach",
+    "twitter": "coryleach"
+  },
+  "repositoryName": "UnityServiceProvider"
 }
