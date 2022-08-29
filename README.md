@@ -45,37 +45,50 @@ Find the manifest.json file in the Packages folder of your project and edit it t
 > can immediately use ServiceCollection.Current and ServiceProvider.Current
 > right out of the box without any setup.
 
-> //ServiceProvider is used to get service instance(s)
-> // MyServiceProvider implements IServiceProvider
-> ServiceProvider.Current = MyServiceProvider;
->
-> //ServiceCollection handles adding which services are provided and how they will be configured (Singleton vs Transient)
-> // MyServiceCollection implements IServiceCollection
-> ServiceCollection.Current = MyServiceCollection;
+```c#
+//ServiceProvider is used to get service instance(s)
+// MyServiceProvider implements IServiceProvider
+ServiceProvider.Current = MyServiceProvider;
+```
+
+```C#
+//ServiceCollection handles adding services to be provided
+//It also controls how they will be configured (Singleton vs Transient)
+//Singleton = All Get calls will return the same service instance
+//Transient = Every Get call will return a newly created instance of the service
+//MyServiceCollection implements IServiceCollection
+ServiceCollection.Current = MyServiceCollection;
+```
 
 ### Adding Singleton Service
-> //This will configure a specific instance which already has been created
-> ServiceCollection.Current.AddSingleton(serviceInstance.GetType(),serviceInstance);
->
-> //You can also configure a service to be served when requesting a parent type
-> ServiceCollection.Current.AddSingleton(typeof(ParentClass),childClassServiceInstance);
->
-> //You can also configure a function that will be used to construct the singleton service on demand
-> ServiceCollection.Current.AddSingleton((provider)=> new MyService());
+```C#
+//This will configure a specific instance which already has been created
+ServiceCollection.Current.AddSingleton(serviceInstance.GetType(),serviceInstance);
+
+//You can also configure a service to be served when requesting a parent type
+ServiceCollection.Current.AddSingleton(typeof(ParentClass),childClassServiceInstance);
+
+//You can also configure a function that will be used to construct the singleton service on demand
+ServiceCollection.Current.AddSingleton((provider)=> new MyService());
+```
 
 ### Adding Transient Service
-> //Transient services require a factory because a new instance is created every time
-> ServiceCollection.Current.AddTransient<ServiceType>((provider) => new ServiceType());
->
-> //Adding a transient service with a parent type
-> ServiceCollection.Current.AddTransient<ParentType,ServiceType>((provider) => (ParentType)new ServiceType());
+```C#
+//Transient services require a factory because a new instance is created every time
+ServiceCollection.Current.AddTransient<ServiceType>((provider) => new ServiceType());
+
+//Adding a transient service with a parent type
+ServiceCollection.Current.AddTransient<ParentType,ServiceType>((provider) => (ParentType)new ServiceType());
+```
 
 ### Getting a Service
-> //Get a particular service
-> var service = ServiceProvider.Get<ServiceType>();
->
-> //If more than one service of the given type is provided we can get them all
-> var services = ServiceProvider.GetAll<ServiceType>();
+```C#
+//Get a particular service
+var service = ServiceProvider.Get<ServiceType>();
+
+//If more than one service of the given type is provided we can get them all
+var services = ServiceProvider.GetAll<ServiceType>();
+```
 
 ### Using the Bootstrapper
 
